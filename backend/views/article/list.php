@@ -38,6 +38,7 @@ $this->title = '文章列表';
                             <tr>
                                 <th>ID</th>
                                 <th>标题</th>
+                                <th>所属分类</th>
                                 <th>查看次数</th>
                                 <th>添加时间</th>
                                 <th>操作</th>
@@ -46,6 +47,7 @@ $this->title = '文章列表';
                                 <tr>
                                     <td><?= ++$k ?></td>
                                     <td><?= $v['title'] ?></td>
+                                    <td><?= $v['category']['name'] ?></td>
                                     <td><?= $v['look'] ?></td>
                                     <td><?= date('Y-m-d H:i:s', $v['created_at']) ?></td>
                                     <td>

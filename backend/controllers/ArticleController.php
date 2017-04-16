@@ -23,7 +23,9 @@ class ArticleController extends BaseController
      */
     public function actionList()
     {
-        $query = ArticleModel::find()->where(['<>', 'status', ArticleModel::DELETE_STATUS]);
+        ArticleModel::setGetCategoryField(['id', 'name']);
+        $query = ArticleModel::find()->where(['<>', 'status', ArticleModel::DELETE_STATUS])
+            ->with('category')->asArray();
         $count = $query->count();
         $pages = new Pagination(['totalCount' => $count, 'pageSize' => 10]);
         $articles = $query->offset($pages->offset)->limit($pages->limit)->all();
@@ -178,8 +180,8 @@ class ArticleController extends BaseController
             }
 
             return $this->redirect([\Yii::$app->controller->id . '/list']);
-        } else {
-            return $this->goBack();
         }
+
+        throw new Exception('请求错误');
     }
 }
