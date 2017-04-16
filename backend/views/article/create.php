@@ -8,6 +8,7 @@ AppAsset::addJsFile($this, [
     "plugins/ueditor/ueditor.config.js",
     "plugins/ueditor/ueditor.all.min.js",
     "plugins/ueditor/lang/zh-cn/zh-cn.js",
+    'plugins/select2/select2.full.js',
 ]);
 
 $this->title = '添加文章';
@@ -22,12 +23,27 @@ $this->title = '添加文章';
     ]); ?>
     <?php $this->endBlock(); ?>
     <div class="body-content">
-
+        <?= \backend\widget\FormAlertWidget::widget(); ?>
         <div class="row">
             <div class="box-body">
                 <form role="form"
                       action="<?= Url::to([Yii::$app->controller->id . '/' . Yii::$app->controller->action->id]) ?>"
                       method="post">
+
+                    <div class="form-group">
+                        <label>所属分类</label>
+                        <select class="form-control select2 select2-hidden-accessible"
+                                style="width: 100%;"
+                                tabindex="-1" aria-hidden="true"
+                                name="ArticleForm[cid]"
+                        >
+                            <?php foreach ($categorys as $k => $v): ?>
+                                <option <?php if ($k == 0) 'selected="selected"' ?> value="<?= $v['id'] ?>">
+                                    <?= $v['name'] ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
 
                     <div class="form-group">
                         <label>文章标题</label>
@@ -51,6 +67,12 @@ $this->title = '添加文章';
                         <span class="help-block m-b-none">
                             <?= $model->getFirstError('content'); ?>
                         </span>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="radio">
+                            <?= Html::activeRadioList($model, 'status', ['1' => '启用', '0' => '禁用']) ?>
+                        </div>
                     </div>
 
                     <div class="form-group">

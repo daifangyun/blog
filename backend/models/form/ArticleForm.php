@@ -13,10 +13,13 @@ use yii\base\Model;
 
 class ArticleForm extends Model
 {
+    public $cid;
     public $title;
     public $abstract;
     public $content;
     public $id;
+    public $status;
+
 
     private $_article;
 
@@ -28,8 +31,10 @@ class ArticleForm extends Model
         return [
             ['id', 'required', 'message' => '{attribute}必须填写'],
             ['id', 'integer', 'min' => 1, 'max' => 11111111111, 'tooSmall' => '{attribute}不符合', 'tooBig' => '{attribute}不符合'],
-            [['title', 'abstract', 'content'], 'required', 'message' => '{attribute}必须填写'],
-            [['title', 'abstract'], 'string', 'min' => 5, 'max' => 255, 'tooShort' => '{attribute}最少为5位', 'tooLong' => '{attribute}最长为255']
+            [['title', 'abstract', 'content', 'cid', 'status'], 'required', 'message' => '{attribute}必须填写'],
+            [['title', 'abstract'], 'string', 'min' => 5, 'max' => 255, 'tooShort' => '{attribute}最少为5位', 'tooLong' => '{attribute}最长为255'],
+            ['cid', 'integer', 'min' => 1, 'max' => 11111111111, 'tooSmall' => '{attribute}不符合', 'tooBig' => '{attribute}不符合'],
+            ['status', 'in', 'range' => [ArticleModel::DISABLE_STATUS, ArticleModel::ENABLE_STATUS, ArticleModel::DELETE_STATUS], 'message' => '{attribute}不符合'],
         ];
     }
 
@@ -37,6 +42,7 @@ class ArticleForm extends Model
     {
         return [
             'id' => 'Id',
+            'cid' => '分类',
             'title' => '标题',
             'abstract' => '摘要',
             'content' => '详情',
@@ -50,8 +56,8 @@ class ArticleForm extends Model
     public function scenarios()
     {
         $scenarios = parent::scenarios();
-        $scenarios[self::SCENARIOS_CREATE] = ['title', 'abstract', 'content'];
-        $scenarios[self::SCENARIO_UPDATE] = ['id', 'title', 'abstract', 'content'];
+        $scenarios[self::SCENARIOS_CREATE] = ['title', 'abstract', 'content', 'cid', 'status'];
+        $scenarios[self::SCENARIO_UPDATE] = ['id', 'title', 'abstract', 'content', 'cid', 'status'];
         return $scenarios;
     }
 
@@ -65,11 +71,11 @@ class ArticleForm extends Model
         $articleModel->title = $this->title;
         $articleModel->abstract = $this->abstract;
         $articleModel->content = $this->content;
-        $articleModel->status = ArticleModel::ENABLE_STATUS;
+        $articleModel->cid = $this->cid;
+        $articleModel->status = $this->status;
         if ($articleModel->save()) {
             return $articleModel;
         }
-        $this->addError('formError', '创建失败,请重试');
         return false;
     }
 
@@ -89,13 +95,15 @@ class ArticleForm extends Model
      */
     public function updateArticle()
     {
-        $this->_article->title = $this->title;
-        $this->_article->abstract = $this->abstract;
-        $this->_article->content = $this->content;
-        if ($this->_article->save()) {
+        $article = $this->findArticleById();
+        $article->title = $this->title;
+        $article->abstract = $this->abstract;
+        $article->content = $this->content;
+        $article->cid = $this->cid;
+        $article->status = $this->status;
+        if ($article->save()) {
             return $this->_article;
         }
-        $this->addError('formError', '修改失败,请重试');
         return false;
     }
 }

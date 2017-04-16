@@ -18,7 +18,7 @@ class m170307_031511_article extends Migration
             'abstract' => $this->string(255)->notNull()->comment('文章摘要'),
             'look' => $this->integer(11)->notNull()->defaultValue(0)->comment('查看次数'),
             'content' => $this->text()->comment('文章详情'),
-            'status' => $this->smallInteger(1)->defaultValue(1)->comment('是否有效,1:有效,0:无效'),
+            'status' => $this->smallInteger(1)->defaultValue(0)->comment('是否有效,1:有效,0:无效, -1:删除'),
             'created_at' => $this->integer()->notNull()->comment('创建时间'),
             'updated_at' => $this->integer()->notNull()->comment('最后修改时间'),
         ], $tableOptions);

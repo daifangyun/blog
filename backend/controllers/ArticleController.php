@@ -9,8 +9,11 @@
 namespace backend\controllers;
 
 use backend\models\ArticleModel;
+use backend\models\CategoryModel;
 use backend\models\form\ArticleForm;
+use yii\base\Exception;
 use yii\data\Pagination;
+use yii\helpers\Url;
 
 class ArticleController extends BaseController
 {
@@ -20,7 +23,7 @@ class ArticleController extends BaseController
      */
     public function actionList()
     {
-        $query = ArticleModel::find()->where(['status' => ArticleModel::ENABLE_STATUS]);
+        $query = ArticleModel::find()->where(['<>', 'status', ArticleModel::DELETE_STATUS]);
         $count = $query->count();
         $pages = new Pagination(['totalCount' => $count, 'pageSize' => 10]);
         $articles = $query->offset($pages->offset)->limit($pages->limit)->all();
@@ -35,14 +38,50 @@ class ArticleController extends BaseController
     {
         $model = new ArticleForm();
 
-        if (\Yii::$app->request->isPost) {
-            $model->setScenario($model::SCENARIOS_CREATE);
-            if ($model->load(\Yii::$app->request->post()) && $model->validate() && $model->createArticle()) {
-                return $this->redirect([\Yii::$app->controller->id . '/' . 'list']);
+        /**
+         * 如果为get提交展示创建视图
+         */
+        if (\Yii::$app->request->isGet) {
+            /**
+             * 获取分类列表,因为标签是挂在分类下的
+             */
+            $categorys = CategoryModel::getAllEnableCategory();
+            if (empty($categorys)) {
+                $emptyCateogry = ['id' => 0, 'name' => '没有分类，请先去添加分类'];
+                array_unshift($categorys, $emptyCateogry);
             }
+
+            $model->status = 0;
+            return $this->render('create', ['model' => $model, 'categorys' => $categorys]);
         }
 
-        return $this->render('create', ['model' => $model]);
+        if (\Yii::$app->request->isPost) {
+            /**
+             * 获取分类列表,因为标签是挂在分类下的
+             */
+            $categorys = CategoryModel::getAllEnableCategory();
+            if (empty($categorys)) {
+                $emptyCateogry = ['id' => 0, 'name' => '没有分类，请先去添加分类'];
+                array_unshift($categorys, $emptyCateogry);
+            }
+
+            $session = \Yii::$app->session;
+            $model->setScenario($model::SCENARIOS_CREATE);
+            if ($model->load(\Yii::$app->request->post()) && $model->validate()) {
+                if ($model->createArticle()) {
+                    $session->setFlash('formSuccess', '提交成功 ...');
+                    return $this->redirect(Url::to([\Yii::$app->controller->id . '/create', true]));
+                } else {
+                    $session->setFlash('formError', '提交失败 ...');
+                }
+            } else {
+                $session->setFlash('formError', '提交失败 ...');
+            }
+
+            return $this->render('create', ['model' => $model]);
+        }
+
+        throw new Exception('请求错误');
     }
 
     /**
@@ -59,6 +98,16 @@ class ArticleController extends BaseController
             if (!$id) {
                 return $this->goHome();
             }
+
+            /**
+             * 获取分类列表,因为标签是挂在分类下的
+             */
+            $categorys = CategoryModel::getAllEnableCategory();
+            if (empty($categorys)) {
+                $emptyCateogry = ['id' => 0, 'name' => '没有分类，请先去添加分类'];
+                array_unshift($categorys, $emptyCateogry);
+            }
+
             $formModel = new ArticleForm();
             $formModel->id = $id;
             $article = $formModel->findArticleById();
@@ -68,33 +117,45 @@ class ArticleController extends BaseController
             }
 
             $formModel->setAttributes($article->toArray());
-            return $this->render('edit', ['model' => $formModel]);
+            return $this->render('edit', ['model' => $formModel, 'categorys' => $categorys]);
         }
 
         /**
          * 如果为post提交,修改数据
          */
         if (\Yii::$app->request->isPost) {
+            $session = \Yii::$app->session;
             $formModel = new ArticleForm();
             $formModel->setScenario(ArticleForm::SCENARIO_UPDATE);
-            if ($formModel->load(\Yii::$app->request->post(), 'ArticleForm') && $formModel->validate()) {
-                $article = $formModel->findArticleById();
-
-                if (!$article) {
-                    return $this->goHome();
-                }
-
+            if ($formModel->load(\Yii::$app->request->post()) && $formModel->validate()) {
                 if ($formModel->updateArticle()) {
-                    return $this->redirect(['/' . \Yii::$app->controller->id . '/list']);
+                    $session->setFlash('formSuccess', '提交成功 ...');
                 } else {
-                    return $this->render('edit', ['model' => $formModel]);
+                    $session->setFlash('formError', '提交失败 ...');
                 }
             } else {
-                return $this->render('edit', ['model' => $formModel]);
+                $session->setFlash('formError', '提交失败 ...');
             }
+
+            /**
+             * 获取分类列表,因为标签是挂在分类下的
+             */
+            $categorys = CategoryModel::getAllEnableCategory();
+            if (empty($categorys)) {
+                $emptyCateogry = ['id' => 0, 'name' => '没有分类，请先去添加分类'];
+                array_unshift($categorys, $emptyCateogry);
+            }
+
+            return $this->render('edit', ['model' => $formModel, 'categorys' => $categorys]);
         }
+
+        throw new Exception('请求错误');
     }
 
+    /**
+     * 删除文章
+     * @return \yii\web\Response
+     */
     public function actionDel()
     {
         if (\Yii::$app->request->isGet) {
@@ -105,11 +166,16 @@ class ArticleController extends BaseController
             $article = ArticleModel::findOne($id);
 
             if (!$article or $article->status == ArticleModel::DISABLE_STATUS) {
-                return $this->goBack();
+                return $this->goHome();
             }
 
-            $article->status = ArticleModel::DISABLE_STATUS;
-            $article->save();
+            $article->status = ArticleModel::DELETE_STATUS;
+            $session = \Yii::$app->session;
+            if ($article->save()) {
+                $session->setFlash('formSuccess', '提交成功 ...');
+            } else {
+                $session->setFlash('formError', '提交失败 ...');
+            }
 
             return $this->redirect([\Yii::$app->controller->id . '/list']);
         } else {

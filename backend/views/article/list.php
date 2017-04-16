@@ -16,6 +16,7 @@ $this->title = '文章列表';
     ]); ?>
     <?php $this->endBlock(); ?>
     <div class="body-content">
+        <?= \backend\widget\FormAlertWidget::widget(); ?>
         <div class="row">
             <div class="box">
                 <div class="box-header">
@@ -48,14 +49,10 @@ $this->title = '文章列表';
                                     <td><?= $v['look'] ?></td>
                                     <td><?= date('Y-m-d H:i:s', $v['created_at']) ?></td>
                                     <td>
-                                        <a href="<?= Url::to([Yii::$app->controller->id . '/edit', 'id' => $v['id']]) ?>"
-                                           style="margin-right: 20px;">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        |
-                                        <a href="<?= Url::to([Yii::$app->controller->id . '/del', 'id' => $v['id']]) ?>"
-                                           style="margin-left: 20px;"><i
-                                                    class="fa fa-trash text-navy"></i></a>
+                                        <a role="button" class="btn btn-info"
+                                           href="<?= Url::to([Yii::$app->controller->id . '/edit', 'id' => $v['id']]) ?>">修改</a>
+                                        <a role="button" class="btn btn-danger"
+                                           href="<?= Url::to([Yii::$app->controller->id . '/del', 'id' => $v['id']]) ?>">删除</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

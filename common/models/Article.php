@@ -9,6 +9,7 @@ use yii\behaviors\TimestampBehavior;
  * This is the model class for table "{{%article}}".
  *
  * @property integer $id
+ * @property integer $cid
  * @property string $title
  * @property string $abstract
  * @property integer $look
@@ -21,6 +22,7 @@ class Article extends \yii\db\ActiveRecord
 {
     const ENABLE_STATUS = 1;
     const DISABLE_STATUS = 0;
+    const DELETE_STATUS = -1;
 
     /**
      * @inheritdoc

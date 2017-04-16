@@ -45,6 +45,7 @@ return [
             'rules' => [
                 "article" => "article/list",
                 "article/<id:\d>" => "article/edit",
+                "article/del/<id:\d>" => "article/del",
             ],
         ],
 
