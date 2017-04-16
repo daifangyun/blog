@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\helpers\Url;
-
+use backend\models\CategoryModel;
 
 $this->title = '文章列表';
 ?>
@@ -10,12 +10,13 @@ $this->title = '文章列表';
     <?php $this->beginBlock('content-header'); ?>
     <?= \backend\widget\BreadcrumbWidget::widget([
         'level' => [
-            '文章管理' => Url::to([Yii::$app->controller->id . '/list']),
+            '分类管理' => Url::to([Yii::$app->controller->id . '/list']),
         ],
-        'active' => '文章列表',
+        'active' => '分类列表',
     ]); ?>
     <?php $this->endBlock(); ?>
     <div class="body-content">
+        <?= \backend\widget\FormAlertWidget::widget() ?>
         <div class="row">
             <div class="box">
                 <div class="box-header">
@@ -27,7 +28,7 @@ $this->title = '文章列表';
                             </div>
                         </div>
                         <a role="button" href="<?= Url::to([Yii::$app->controller->id . '/create']); ?>"
-                           class="btn-sm btn-default pull-right">添加文章</a>
+                           class="btn-sm btn-default pull-right">添加分类</a>
                     </div>
                 </div>
                 <div class="box-body">
@@ -35,27 +36,32 @@ $this->title = '文章列表';
                         <table class="table table-hover">
                             <tbody>
                             <tr>
-                                <th>ID</th>
-                                <th>标题</th>
-                                <th>查看次数</th>
+                                <th>序号</th>
+                                <th>分类名称</th>
+                                <th>分类排序</th>
+                                <th>是否启用</th>
                                 <th>添加时间</th>
                                 <th>操作</th>
                             </tr>
-                            <?php foreach ($articles as $k => $v): ?>
+                            <?php foreach ($list as $k => $v): ?>
                                 <tr>
                                     <td><?= ++$k ?></td>
-                                    <td><?= $v['title'] ?></td>
-                                    <td><?= $v['look'] ?></td>
+                                    <td><?= Html::encode($v['name']) ?></td>
+                                    <td><?= Html::encode($v['sort']) ?></td>
+                                    <td>
+                                        <?php
+                                        if ($v['status'] == CategoryModel::STATUS_ENABLE) echo '启用';
+                                        if ($v['status'] == CategoryModel::STATUS_DISABLE) echo '禁用';
+                                        ?>
+                                    </td>
                                     <td><?= date('Y-m-d H:i:s', $v['created_at']) ?></td>
                                     <td>
-                                        <a href="<?= Url::to([Yii::$app->controller->id . '/edit', 'id' => $v['id']]) ?>"
-                                           style="margin-right: 20px;">
-                                            <i class="fa fa-edit"></i>
-                                        </a>
-                                        |
-                                        <a href="<?= Url::to([Yii::$app->controller->id . '/del', 'id' => $v['id']]) ?>"
-                                           style="margin-left: 20px;"><i
-                                                    class="fa fa-trash text-navy"></i></a>
+                                        <div class="btn-group">
+                                            <a role="button" class="btn btn-info"
+                                               href="<?= Url::to([Yii::$app->controller->id . '/edit', 'id' => $v['id']]) ?>">修改</a>
+                                            <a role="button" class="btn btn-danger"
+                                               href="<?= Url::to([Yii::$app->controller->id . '/del', 'id' => $v['id']]) ?>">删除</a>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

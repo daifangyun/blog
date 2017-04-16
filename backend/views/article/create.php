@@ -13,6 +13,14 @@ AppAsset::addJsFile($this, [
 $this->title = '添加文章';
 ?>
 <div class="site-index">
+    <?php $this->beginBlock('content-header'); ?>
+    <?= \backend\widget\BreadcrumbWidget::widget([
+        'level' => [
+            '文章管理' => Url::to([Yii::$app->controller->id . '/list']),
+        ],
+        'active' => '添加文章',
+    ]); ?>
+    <?php $this->endBlock(); ?>
     <div class="body-content">
 
         <div class="row">
@@ -23,7 +31,7 @@ $this->title = '添加文章';
 
                     <div class="form-group">
                         <label>文章标题</label>
-                        <?= Html::activeTextInput($model, 'title', ['class' => 'form-control', 'placeholder' => '文章标题 ...']); ?>
+                        <?= Html::activeTextInput($model,'title', ['class' => 'form-control', 'placeholder' => '文章标题 ...']); ?>
                         <span class="help-block m-b-none">
                             <?= $model->getFirstError('title'); ?>
                         </span>

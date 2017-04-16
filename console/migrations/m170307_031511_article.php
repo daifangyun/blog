@@ -13,6 +13,7 @@ class m170307_031511_article extends Migration
 
         $this->createTable('{{%article}}', [
             'id' => $this->primaryKey()->comment('自增id'),
+            'cid' => $this->integer(11)->notNull()->defaultValue(0)->comment('所属分类，对应category迁移的id'),
             'title' => $this->string(255)->notNull()->comment('文章标题'),
             'abstract' => $this->string(255)->notNull()->comment('文章摘要'),
             'look' => $this->integer(11)->notNull()->defaultValue(0)->comment('查看次数'),

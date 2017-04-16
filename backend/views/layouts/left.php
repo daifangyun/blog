@@ -33,12 +33,12 @@
                     ['label' => '菜单列表', 'options' => ['class' => 'header']],
                     ['label' => '基本统计', 'icon' => 'stack-exchange', 'url' => ['/gii']],
                     [
-                        'label' => '文章管理',
-                        'icon' => 'book',
+                        'label' => '内容管理',
+                        'icon' => 'industry',
                         'url' => '#',
                         'items' => [
-                            ['label' => '添加文章', 'icon' => 'plus', 'url' => ['/article/create'],],
-                            ['label' => '文章列表', 'icon' => 'list-ul', 'url' => ['/article/list'],],
+                            ['label' => '文章列表', 'icon' => 'book', 'url' => ['/article/list'],],
+                            ['label' => '分类管理', 'icon' => 'cubes', 'url' => ['/category/list'],],
                         ],
                     ],
                     [
